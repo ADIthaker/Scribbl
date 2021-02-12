@@ -3,6 +3,12 @@ const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
 const app = express();
+const redis = require("redis");
+const redisClient = redis.createClient();
+
+redisClient.on("error", function(error) {
+  console.error(error);
+});
 
 app.set('views', path.join(__dirname, 'views')) ;
 app.set('view engine', 'ejs');
@@ -16,7 +22,6 @@ app.get('/createroom',(req,res,next) => {
 	res.redirect(`/room/${val}`);
 });
 app.get('/room/:roomId',(req,res,next)=>{
-	console.log(req.params.roomId);
 	res.render('index.ejs',{roomId:req.params.roomId});
 });
 app.use('/public',express.static('public'));
@@ -38,4 +43,4 @@ io.on('connection', (socket) => {
 	socket.on('disconnect', () => console.log('Client has disconnected'))
 })
 
-server.listen('3000')
+server.listen('3000');

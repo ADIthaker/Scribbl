@@ -9,7 +9,7 @@ function setup() {
 	cv.background(0);
 	console.log(roomId);
 	// Start the socket connection
-	socket = io.connect(`http://localhost:3000/room/${roomId}`);
+	socket = io(`http://localhost:3000/`);
 	console.log(socket);
 	// Callback function
 	socket.on('mouse', data => {
