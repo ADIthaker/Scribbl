@@ -1,20 +1,30 @@
 const http = require('http')
-const express = require('express')
-
+const express = require('express');
+const crypto = require('crypto');
+const path = require('path');
 const app = express();
 
+app.set('views', path.join(__dirname, 'views')) ;
+app.set('view engine', 'ejs');
 
-app.use(express.static('public'))
-
-app.get('/new',(req,res,next)=>{
-	res.sendFile('public/new.html',{root:__dirname});
+app.get('/',(req,res,next)=>{
+	res.render('new.ejs');
 });
 
+app.get('/createroom',(req,res,next) => {
+	let val = crypto.randomBytes(16).toString('hex');
+	res.redirect(`/room/${val}`);
+});
+app.get('/room/:roomId',(req,res,next)=>{
+	console.log(req.params.roomId);
+	res.render('index.ejs',{roomId:req.params.roomId});
+});
+app.use('/public',express.static('public'));
 app.set('port', '3000');
 
-const server = http.createServer(app)
+const server = http.createServer(app);
 server.on('listening', () => {
- console.log('Listening on port 3000 GO to http://localhost:3000/')
+ console.log('Listening on port 3000 \nGO to http://localhost:3000/')
 })
 
 // Web sockets

@@ -1,16 +1,16 @@
-var socket;
-var color = '#FFF';
-var strokeWidth = 4;
+let socket;
+let color = '#FFF';
+let strokeWidth = 4;
 
 function setup() {
 	// Creating canvas
-	const cv = createCanvas(800, 600);
-	cv.position(600, 100);
+	const cv = createCanvas(700, 700);
+	cv.position(400, 100);
 	cv.background(0);
-
+	console.log(roomId);
 	// Start the socket connection
-	socket = io.connect('http://localhost:3000');
-
+	socket = io.connect(`http://localhost:3000/room/${roomId}`);
+	console.log(socket);
 	// Callback function
 	socket.on('mouse', data => {
 		stroke(data.color);
