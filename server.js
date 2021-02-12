@@ -1,14 +1,20 @@
 const http = require('http')
 const express = require('express')
 
-const app = express()
+const app = express();
+
+
 app.use(express.static('public'))
 
-app.set('port', '3000')
+app.get('/new',(req,res,next)=>{
+	res.sendFile('public/new.html',{root:__dirname});
+});
+
+app.set('port', '3000');
 
 const server = http.createServer(app)
 server.on('listening', () => {
- console.log('Listening on port 3000')
+ console.log('Listening on port 3000 GO to http://localhost:3000/')
 })
 
 // Web sockets
