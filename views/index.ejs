@@ -4,6 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Scribbl.io</title>
+  <link rel = "icon" href =  
+"public/logo.png"
+        type = "image/x-icon">
+    <script src="https://unpkg.com/uuid@latest/dist/umd/uuidv1.min.js"></script>
   <link rel="stylesheet" type="text/css" href="/public/styles.css" />
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
@@ -17,14 +21,39 @@
 </head>
 
 <body>
-  <p>Choose color (# hex)</p>
-  <input type="text" name="custom_color" placeholder="#FFFFFF" id="pickcolor" class="call-picker" />
-  <div id="color-holder" class="color-holder call-picker"></div>
-  <button id="color-btn">Change color</button>
-  <br />
-  <p>Choose stroke width</p>
-  <input type="text" name="stroke_width" placeholder="4" id="stroke-width-picker" class="stroke_width_picker" />
-  <button id="stroke-btn">Change stroke width</button>
+  <div class="wrapper">
+    <div class="row" id="canvas-area">
+      <div class="col-md-6">
+        <!-- <p>Choose color (# hex)</p>
+        <input type="text" name="custom_color" placeholder="#FFFFFF" id="pickcolor" class="call-picker" />
+        <div id="color-holder" class="color-holder call-picker"></div>
+        <button id="color-btn">Change color</button>
+        <br />
+        <p>Choose stroke width</p>
+        <input type="text" name="stroke_width" placeholder="4" id="stroke-width-picker" class="stroke_width_picker" />
+        <button id="stroke-btn">Change stroke width</button> -->
+      </div>
+      <div class="col-md-6" id="canvas-parent">
+        
+      </div>      
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+      
+      </div>
+      <div class="col-md-6"  class="control-wrapper">
+        <p>Choose color (# hex)</p>
+        <input type="text" name="custom_color" placeholder="#FFFFFF" id="pickcolor" class="call-picker" />
+        <div id="color-holder" class="color-holder call-picker"></div>
+        <button id="color-btn">Change color</button>
+        <br />
+        <p>Choose stroke width</p>
+        <input type="text" name="stroke_width" placeholder="4" id="stroke-width-picker" class="stroke_width_picker" />
+        <button id="stroke-btn">Change stroke width</button>
+      </div>
+    </div>
+  </div>
+ 
 </body>
 <script>
   const roomId= '<%=roomId%>'

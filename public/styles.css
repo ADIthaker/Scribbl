@@ -1,12 +1,19 @@
-input.call-picker {
-    border: 1px solid #AAA;
-    color: #666;
-    text-transform: uppercase;
-    float: left;
-    outline: none;
-    padding: 10px;
-    text-transform: uppercase;
-    width: 85px;
+  body,html{
+    overflow-x: hidden;
+  }
+
+  html{
+    overflow-y: hidden;
+  }
+  input.call-picker {
+      border: 1px solid #AAA;
+      color: #666;
+      text-transform: uppercase;
+      float: left;
+      outline: none;
+      padding: 10px;
+      text-transform: uppercase;
+      width: 85px;
   }
   
   .color-picker {
@@ -46,6 +53,23 @@ input.call-picker {
     margin-top: 2rem;
     margin-bottom: 2rem;
   }
+
   button {
     margin-left: 1rem;
+  }
+
+  .drawing-board{
+    width:95%  !important;
+    height:100%  !important;
+  }
+
+  #canvas-area{
+    height:600px;
+    margin-bottom:2rem;
+  }
+
+  .wrapper{
+    margin-top:3rem;
+    width:auto;
+    height:100vh;
   }

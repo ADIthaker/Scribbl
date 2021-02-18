@@ -1,23 +1,34 @@
 let socket;
-let color = '#FFF';
+let color = '#000';
 let strokeWidth = 4;
-
 function setup() {
 	// Creating canvas
-	const cv = createCanvas(700, 700);
-	cv.position(400, 100);
-	cv.background(0);
+	const cv = createCanvas(600, 600);
+	cv.position(0,0);
+	cv.background(255,255,255);
+	cv.style('border','1px solid black');
+	cv.parent("canvas-parent");
+	cv.class('drawing-board');
 	console.log(roomId);
 	// Start the socket connection
 	socket = io(`http://localhost:3000/`);
-	console.log(socket);
-	// Callback function
+	console.log(JSON.parse(sessionStorage.getItem("userInfo")));
+	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+	if(userInfo == null){
+		let userId = uuidv1();
+		sessionStorage.setItem("userInfo",JSON.stringify({
+			userId: userId,
+			roomId: roomId,
+		}));
+		socket.emit('connected_to_room', {roomId: roomId, userId:userId});
+	} else {
+		socket.emit("user_rejoined",userInfo);
+	}
 	socket.on('mouse', data => {
 		stroke(data.color);
 		strokeWeight(data.strokeWidth)
 		line(data.x, data.y, data.px, data.py);
 	});
-
 	// Getting our buttons and the holder through the p5.js dom
 	const color_picker = select('#pickcolor');
 	const color_btn = select('#color-btn');
