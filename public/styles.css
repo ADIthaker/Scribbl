@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
   body,html{
     overflow-x: hidden;
   }
@@ -72,4 +73,14 @@
     margin-top:3rem;
     width:auto;
     height:100vh;
+  }
+  .player-tab{
+    height: 60px;
+    line-height: 60px;
+    font-size:2rem;
+    vertical-align: middle;
+    font-family: 'Permanent Marker', cursive;
+    border-left: 10px solid rgb(191, 59, 145);
+    padding-left: 1rem;
+    margin-bottom: 10px;
   }

@@ -9,21 +9,26 @@ function setup() {
 	cv.style('border','1px solid black');
 	cv.parent("canvas-parent");
 	cv.class('drawing-board');
-	console.log(roomId);
-	// Start the socket connection
 	socket = io(`http://localhost:3000/`);
-	console.log(JSON.parse(sessionStorage.getItem("userInfo")));
 	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+	let userId;
 	if(userInfo == null){
-		let userId = uuidv1();
+		userId = uuidv1();
 		sessionStorage.setItem("userInfo",JSON.stringify({
 			userId: userId,
 			roomId: roomId,
 		}));
-		socket.emit('connected_to_room', {roomId: roomId, userId:userId});
+		socket.emit("connected_to_room", {roomId: roomId, userId: userId});
 	} else {
-		socket.emit("user_rejoined",userInfo);
+		socket.emit("connected_to_room", userInfo);
 	}
+	socket.on("all_players", users => {
+		const playersPane = document.getElementById("player-pane");
+		playersPane.innerHTML = "";
+		users.forEach( user => {
+			addPlayerTo(user,playersPane);
+		});
+	});
 	socket.on('mouse', data => {
 		stroke(data.color);
 		strokeWeight(data.strokeWidth)
@@ -54,6 +59,7 @@ function setup() {
 	})
 }
 
+
 function mouseDragged() {
 	// Draw
 	stroke(color)
@@ -64,9 +70,23 @@ function mouseDragged() {
 	sendmouse(mouseX, mouseY, pmouseX, pmouseY)
 }
 
+function addPlayerTo (name, playersPane) {
+	let newplayer = document.createElement("div");
+	let col = document.createElement("div");
+	newplayer.innerHTML= name;
+	newplayer.classList.add("player-tab");
+	col.classList.add("col-12");
+	col.appendChild(newplayer);
+	playersPane.appendChild(col);
+	
+}
 // Sending data to the socket
 function sendmouse(x, y, pX, pY) {
+	let userId = JSON.parse(sessionStorage.getItem("userInfo")).userId;
+	let roomId = JSON.parse(sessionStorage.getItem("userInfo")).roomId;
 	const data = {
+		userId,
+		roomId,
 		x: x,
 		y: y,
 		px: pX,
