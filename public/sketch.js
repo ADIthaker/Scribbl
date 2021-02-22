@@ -3,7 +3,7 @@ let color = '#000';
 let strokeWidth = 4;
 function setup() {
 	// Creating canvas
-	const cv = createCanvas(600, 600);
+	const cv = createCanvas(620, 600);
 	cv.position(0,0);
 	cv.background(255,255,255);
 	cv.style('border','1px solid black');
@@ -27,36 +27,69 @@ function setup() {
 		playersPane.innerHTML = "";
 		users.forEach( user => {
 			addPlayerTo(user,playersPane);
-		});
+		})
 	});
 	socket.on('mouse', data => {
 		stroke(data.color);
 		strokeWeight(data.strokeWidth)
 		line(data.x, data.y, data.px, data.py);
 	});
+	const colorPickers = document.getElementsByClassName("color-sel");
+	for(let i=0;i<colorPickers.length;i++){
+
+		colorPickers[i].addEventListener("click", function assignColor(e){
+			color = window.getComputedStyle(colorPickers[i]).backgroundColor;
+			sessionStorage.setItem("color",window.getComputedStyle(colorPickers[i]).backgroundColor);
+		});	
+	}
+	const cleanButton = select(".clear-button");
+	const eraser = select(".eraser");
+	const pen = select(".pen");
+	eraser.mousePressed(()=>{
+		color = "#fff";
+		eraser.style("border","5px solid #4243DC");
+		pen.style("border","3px solid rgb(255, 240, 0)");
+		cv.removeClass("pen-on");
+		cv.addClass("eraser-on");		
+	})
+	pen.mousePressed(()=>{
+		color = sessionStorage.getItem("color");
+		eraser.style("border","3px solid rgb(255, 240, 0)");
+		pen.style("border","5px solid #4243DC");
+		cv.removeClass("eraser-on");
+		cv.addClass("pen-on");
+	})
+	cleanButton.mousePressed(()=>{
+		cv.background(255,255,255)
+	});
+	const strokeInp = select("#stroke-weight");
+	strokeWidth = 3;
+	strokeInp.input(()=>{
+		strokeWidth = strokeInp.value();
+	})
 	// Getting our buttons and the holder through the p5.js dom
-	const color_picker = select('#pickcolor');
-	const color_btn = select('#color-btn');
-	const color_holder = select('#color-holder');
+	// const color_picker = select('#pickcolor');
+	// const color_btn = select('#color-btn');
+	// const color_holder = select('#color-holder');
 
-	const stroke_width_picker = select('#stroke-width-picker');
-	const stroke_btn = select('#stroke-btn');
+	// const stroke_width_picker = select('#stroke-width-picker');
+	// const stroke_btn = select('#stroke-btn');
 
-	// Adding a mousePressed listener to the button
-	color_btn.mousePressed(() => {
-		// Checking if the input is a valid hex color
-		if (/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color_picker.value())) {
-			color = color_picker.value();
-			color_holder.style('background-color', color);
-		}
-		else {console.log('Enter a valid hex value')}
-	})
+	// // Adding a mousePressed listener to the button
+	// color_btn.mousePressed(() => {
+	// 	// Checking if the input is a valid hex color
+	// 	if (/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color_picker.value())) {
+	// 		color = color_picker.value();
+	// 		color_holder.style('background-color', color);
+	// 	}
+	// 	else {console.log('Enter a valid hex value')}
+	// })
 
-	// Adding a mousePressed listener to the button
-	stroke_btn.mousePressed(() => {
-		const width = parseInt(stroke_width_picker.value())
-		if (width > 0) strokeWidth = width
-	})
+	// // Adding a mousePressed listener to the button
+	// stroke_btn.mousePressed(() => {
+	// 	const width = parseInt(stroke_width_picker.value())
+	// 	if (width > 0) strokeWidth = width
+	// })
 }
 
 
@@ -73,12 +106,15 @@ function mouseDragged() {
 function addPlayerTo (name, playersPane) {
 	let newplayer = document.createElement("div");
 	let col = document.createElement("div");
-	newplayer.innerHTML= name;
+	newplayer.innerHTML= "Aditya";
 	newplayer.classList.add("player-tab");
 	col.classList.add("col-12");
 	col.appendChild(newplayer);
 	playersPane.appendChild(col);
-	
+}
+
+function utilityButton (){
+
 }
 // Sending data to the socket
 function sendmouse(x, y, pX, pY) {

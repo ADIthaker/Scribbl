@@ -5,10 +5,11 @@
   <meta charset="UTF-8" />
   <title>Scribbl.io</title>
   <link rel = "icon" href =  
-"public/logo.png"
+"/public/logo.png"
         type = "image/x-icon">
     <script src="https://unpkg.com/uuid@latest/dist/umd/uuidv1.min.js"></script>
   <link rel="stylesheet" type="text/css" href="/public/styles.css" />
+  <link rel="stylesheet" type="text/css" href="/public/inputstyles.css" />
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.sound.min.js">
@@ -22,32 +23,44 @@
 
 <body>
   <div class="wrapper">
-    <div class="row" id="canvas-area">
-      <div class="col-md-6">
+    <div class="row pen-on" id="canvas-area">
+      <div class="col-md-2">
         <div class="row" id="player-pane">
         </div>
       </div>
-      <div class="col-md-6" id="canvas-parent">
+      <div class="col-md-7" id="canvas-parent">
         
+        <button class="clear-button"></button>
+        <button class="pen"></button>
+        <button class="eraser"></button>
       </div>      
     </div>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-4">
         
       </div>
-      <div class="col-md-6"  class="control-wrapper">
-        <p>Choose color (# hex)</p>
-        <input type="text" name="custom_color" placeholder="#FFFFFF" id="pickcolor" class="call-picker" />
-        <div id="color-holder" class="color-holder call-picker"></div>
-        <button id="color-btn">Change color</button>
-        <br />
-        <p>Choose stroke width</p>
-        <input type="text" name="stroke_width" placeholder="4" id="stroke-width-picker" class="stroke_width_picker" />
-        <button id="stroke-btn">Change stroke width</button>
+      <div class="col-md-4 control-wrapper">
+        <div class="row color-pane">
+          <div class="col-1 color-sel" id="crimson"></div>
+          <div class="col-1 color-sel" id="black" ></div>
+          <div class="col-1 color-sel" id="orange"></div>
+          <div class="col-1 color-sel" id="limestone"></div>
+          <div class="col-1 color-sel" id="pink"></div>
+          <div class="col-7"><input type="range" id="stroke-weight" min="4" max="30" value="5"></div>
+        </div>
+        <div class="row color-pane">
+          <div class="col-1 color-sel" id="green"></div>
+          <div class="col-1 color-sel" id="grey"></div>
+          <div class="col-1 color-sel" id="brown"></div>
+          <div class="col-1 color-sel" id="blue"></div>
+          <div class="col-1 color-sel" id="yellow"></div>
+        </div>
+        
       </div>
     </div>
   </div>
- 
+  <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+  <div>Icons made by <a href="https://www.flaticon.com/authors/darius-dan" title="Darius Dan">Darius Dan</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 </body>
 <script>
   const roomId= '<%=roomId%>'

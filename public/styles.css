@@ -1,86 +1,160 @@
 @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
   body,html{
     overflow-x: hidden;
+    background-image: url("/public/pattern1.svg") !important;
+    
   }
-
-  html{
-    overflow-y: hidden;
-  }
-  input.call-picker {
-      border: 1px solid #AAA;
-      color: #666;
-      text-transform: uppercase;
-      float: left;
-      outline: none;
-      padding: 10px;
-      text-transform: uppercase;
-      width: 85px;
-  }
-  
-  .color-picker {
-    width: 130px;
-    background: #F3F3F3;
-    height: 81px;
-    padding: 5px;
-    border: 5px solid #fff;
-    box-shadow: 0px 0px 3px 1px #DDD;
-    position: absolute;
-    top: 61px;
-    left: 2px;
-  }
-  
-  .color-holder {
-    background: #fff;
-    cursor: pointer;
-    border: 1px solid #AAA;
-    width: 40px;
-    height: 36px;
-    float: left;
-    margin-left: 5px;
-  }
-  
-  input.stroke_width_picker {
-    border: 1px solid #AAA;
-    color: #666;
-    text-transform: uppercase;
-    float: left;
-    outline: none;
-    padding: 10px;
-    text-transform: uppercase;
-    width: 85px;
-  }
-  
-  p {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  button {
-    margin-left: 1rem;
-  }
-
   .drawing-board{
     width:95%  !important;
     height:100%  !important;
+    border-radius:1rem;
+    border: 5px solid #6204BF  !important;
   }
-
+  .pen-on:hover{
+    cursor: url("pencil-cursor.svg") 0 12 ,pointer;
+  }
+  .eraser-on:hover{
+    cursor: url("eraser.svg"),pointer;
+  }
   #canvas-area{
     height:600px;
     margin-bottom:2rem;
   }
-
   .wrapper{
     margin-top:3rem;
     width:auto;
     height:100vh;
   }
+  #player-pane{
+    margin-top:1rem;
+  }
   .player-tab{
     height: 60px;
-    line-height: 60px;
+    line-height: 50px;
     font-size:2rem;
     vertical-align: middle;
     font-family: 'Permanent Marker', cursive;
-    border-left: 10px solid rgb(191, 59, 145);
+    border:2px dashed #4243DC;
+    border-left: 10px solid #7181FF;
     padding-left: 1rem;
     margin-bottom: 10px;
+    background-color: rgba(242, 135, 5,0.9);
+    color:white;
+    text-shadow: 0 1px 0 #ccc, 
+               0 2px 0 #c9c9c9,
+               0 3px 0 #bbb,
+               0 4px 0 #b9b9b9,
+               0 5px 0 #aaa,
+               0 6px 1px rgba(0,0,0,.1),
+               0 0 5px rgba(0,0,0,.1),
+               0 1px 3px rgba(0,0,0,.3),
+               0 3px 5px rgba(0,0,0,.2),
+               0 5px 10px rgba(0,0,0,.25),
+               0 10px 10px rgba(0,0,0,.2),
+               0 20px 20px rgba(0,0,0,.15);
+    width:100%;
+  }
+  .control-wrapper{
+    height: 100px;
+    margin-bottom: 3rem;
+  }
+  .color-sel{
+    width: 50px !important;
+    padding: 0px  !important;
+    height:100%;
+  }
+  .color-sel:hover{
+    cursor: pointer;
+  }
+  #canvas-parent{
+    padding:0 !important;
+  }
+  .pen{
+    position: absolute;
+    bottom: 6.5%;
+    background: url("pencil-cursor.svg");
+    background-size: 40px 30px;
+    background-repeat: no-repeat;
+    height:40px;
+    width:40px;
+    right: 19%;
+    border-radius: 50%;
+    outline: 0;
+    border:3px solid rgb(255, 240, 0);
+    background-color: white;
+    z-index: 10;
+  }
+  .eraser{
+    position: absolute;
+    bottom: 6.5%;
+    background: url("eraser.svg");
+    background-size: 40px 30px;
+    background-repeat: no-repeat;
+    height:40px;
+    width:40px;
+    right: 25%;
+    border-radius: 50%;
+    outline: 0;
+    border:3px solid rgb(255, 240, 0);
+    background-color: white;
+    z-index: 10;
+  }
+  .clear-button{
+    position: absolute;
+    bottom: 5%;
+    background: url("wipe.svg");
+    background-size: 60px 60px;
+    height:60px;
+    width:60px;
+    right: 9%;
+    border-radius: 50%;
+    outline: 0;
+    border:3px solid rgb(255, 240, 0);
+    background-color: white;
+    z-index: 10;
+  }
+  .clear-button:focus,.clear-button:hover,.eraser:hover,.pen:hover{
+    outline: none;
+  }
+  .pen:focus{
+    outline:none;
+    border: 5px solid #4243DC;
+  }
+  .eraser:focus{
+    outline:none;
+    border: 5px solid #4243DC;
+  }
+  .color-pane{
+    height:50%;
+    margin-bottom: 1rem;
+  }
+  #crimson{
+    background-color: rgb(224, 0, 0);
+  }
+  #black{
+    background-color: black;
+  }  
+  #orange{
+    background-color: #F16B12;
+  }  
+  #limestone{
+    background-color: #e7c29a;
+  }  
+  #pink{
+    background-color: #FA9ACF;
+  }  
+  #green{
+    background-color: limegreen;
+  }  
+  #grey{
+    background-color: #b9b9b9;
+  }  
+  #brown{
+    background-color: #532512;
+  }  
+  #blue{
+    background-color: #29ADE4;
+  }  
+  #yellow{
+    background-color: rgb(255, 240, 0);
   }
