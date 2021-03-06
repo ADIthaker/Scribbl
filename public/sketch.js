@@ -29,7 +29,6 @@ function setup() {
 			addPlayerTo(user,playersPane);
 		})
 	});
-	
 	socket.on('mouse', data => {
 		stroke(data.color);
 		strokeWeight(data.strokeWidth)
@@ -74,7 +73,8 @@ function setup() {
 function mouseDragged() {
 	stroke(color)
 	strokeWeight(strokeWidth)
-	line(mouseX, mouseY, pmouseX, pmouseY);
+	line(mouseX, mouseY, pmouseX, pmouseY)
+
 	sendmouse(mouseX, mouseY, pmouseX, pmouseY)
 }
 
@@ -82,15 +82,12 @@ function addPlayerTo (name, playersPane) {
 	let newplayer = document.createElement("div");
 	let col = document.createElement("div");
 	newplayer.innerHTML= "Aditya";
-	newplayer.classList.add("lobby-players");
+	newplayer.classList.add("player-tab");
 	col.classList.add("col-12");
 	col.appendChild(newplayer);
 	playersPane.appendChild(col);
 }
 
-function utilityButton (){
-
-}
 function sendmouse(x, y, pX, pY) {
 	let userId = JSON.parse(sessionStorage.getItem("userInfo")).userId;
 	let roomId = JSON.parse(sessionStorage.getItem("userInfo")).roomId;
