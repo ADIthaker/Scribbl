@@ -21,6 +21,10 @@ app.get("/",(req,res,next)=>{
 });
 
 app.use(lobbyRoutes);
+app.get("/lobby/:roomId",(req,res,next)=>{
+	console.log("admin",req.query.isadmin);
+	res.render("lobby.ejs",{roomId:req.params.roomId,admin:req.query.isadmin});
+});
 app.get("/room/:roomId",(req,res,next)=>{
 	res.render("index.ejs",{roomId:req.params.roomId});
 });
@@ -35,6 +39,46 @@ const io = require("socket.io")(server);
 server.listen("3000");
 io.adapter(redis({ host: "127.0.0.1", port: 6379 }));
 io.on("connection", (socket) => {
+	socket.on("joined lobby",data=>{
+		socket.data = data;
+		socket.join(data.roomId);
+		redisClient.sadd(data.roomId,socket.data.userId)
+		.then(res => {
+			console.log(`${data.userId} joined room ${data.roomId}`,"\n\n");
+		});
+		if (socket.data.admin){
+			redisClient.set(socket.data.roomId+"admin",socket.data.userId)
+			.then(res =>{
+				redisClient.smembers(socket.data.roomId)
+				.then(data => {
+					redisClient.get(socket.data.roomId+"admin")
+					.then(adminId=>{
+						let lobbyInfo = {
+							adminId,
+							users: data,
+						};
+						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+					})
+					
+				});
+			});
+		}
+		else {
+			redisClient.smembers(socket.data.roomId)
+			.then(data => {
+				redisClient.get(socket.data.roomId+"admin")
+					.then(adminId=>{
+						let lobbyInfo = {
+							adminId,
+							users: data,
+						};
+						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+					})
+			});
+		}
+		
+		
+	});
 	socket.on("connected_to_room", (data)=>{
 		socket.data = data;
 		socket.join(data.roomId);
@@ -55,8 +99,15 @@ io.on("connection", (socket) => {
 			let currParticipants = await redisClient.smembers(socket.data.roomId);
 			let newParticipants = currParticipants.filter(val=>{
 				return val != socket.data.userId;
+
 			});
+			
 			if(newParticipants.length != 0 ) {
+				let adminId = await redisClient.get(socket.data.roomId+"admin");
+				if(adminId == socket.data.userId) {
+					adminId = newParticipants[Math.random()*newParticipants.length]
+					await redisClient.set(socket.data.roomId+"admin",adminId);
+				}
 				redisClient
 				.pipeline()
 				.del(socket.data.roomId)
@@ -67,13 +118,18 @@ io.on("connection", (socket) => {
 				});
 				redisClient.smembers(socket.data.roomId)
 				.then(data => {
-					io.in(socket.data.roomId).emit("all_players", data);
+					let lobbyInfo = {
+						adminId,
+						users:data,
+					}
+					io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+					io.in(socket.data.roomId).emit("all_players", lobbyInfo);
 				});
 			} else {
 				await redisClient.del(socket.data.roomId);
+				await redisClient.del(socket.data.roomId+"admin");
 				console.log(`${socket.data.roomId} room cleared`);
 			}
-			
 		} catch(err){
 			console.log(err);
 		}
