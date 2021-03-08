@@ -12,6 +12,4 @@ router.get("/createroom",(req,res,next) => {
 	res.redirect(`/lobby/${val}/?`+adminVal);
 });
 
-
-
 module.exports = router;

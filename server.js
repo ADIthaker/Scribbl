@@ -79,6 +79,9 @@ io.on("connection", (socket) => {
 		
 		
 	});
+	socket.on("game started", data => {
+
+	});
 	socket.on("connected_to_room", (data)=>{
 		socket.data = data;
 		socket.join(data.roomId);
@@ -94,19 +97,24 @@ io.on("connection", (socket) => {
 	socket.on("mouse", data => {
 		socket.to(data.roomId).emit("mouse", data);
 	});
+	socket.on("game start",roomId=>{
+		io.in(socket.data.roomId).emit("go to game",roomId);
+	});
 	socket.on("disconnect", async () => {
 		try{
 			let currParticipants = await redisClient.smembers(socket.data.roomId);
 			let newParticipants = currParticipants.filter(val=>{
 				return val != socket.data.userId;
-
 			});
 			
 			if(newParticipants.length != 0 ) {
 				let adminId = await redisClient.get(socket.data.roomId+"admin");
 				if(adminId == socket.data.userId) {
-					adminId = newParticipants[Math.random()*newParticipants.length]
+					console.log("ADMIN HAS LEFT, MAKING A RANDOM USER ADMIN")
+					adminId = newParticipants[Math.floor(Math.random()*newParticipants.length)];
+					console.log(adminId);
 					await redisClient.set(socket.data.roomId+"admin",adminId);
+					io.in(socket.data.roomId).emit("admin changed",adminId);
 				}
 				redisClient
 				.pipeline()

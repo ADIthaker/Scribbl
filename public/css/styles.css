@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
   body,html{
     overflow-x: hidden;
-    background-image: url("/public/pattern1.svg") !important;
+    background-image: url("/public/img/pattern1.svg") !important;
     
   }
   .drawing-board{
@@ -11,10 +11,10 @@
     border: 5px solid #6204BF  !important;
   }
   .drawing-board:hover{
-    cursor: url("pencil-cursor.svg") 0 12 ,pointer;
+    cursor: url("/public/img/pencil-cursor.svg") 0 12 ,pointer;
   }
   .eraser-on:hover{
-    cursor: url("eraser.svg"),pointer;
+    cursor: url("/public/img/eraser.svg"),pointer;
   }
   #canvas-area{
     height:600px;
@@ -72,7 +72,7 @@
   .pen{
     position: absolute;
     bottom: 6.5%;
-    background: url("pencil-cursor.svg");
+    background: url("/public/img/pencil-cursor.svg");
     background-size: 40px 30px;
     background-repeat: no-repeat;
     height:40px;
@@ -87,7 +87,7 @@
   .eraser{
     position: absolute;
     bottom: 6.5%;
-    background: url("eraser.svg");
+    background: url("/public/img/eraser.svg");
     background-size: 40px 30px;
     background-repeat: no-repeat;
     height:40px;
@@ -102,7 +102,7 @@
   .clear-button{
     position: absolute;
     bottom: 5%;
-    background: url("wipe.svg");
+    background: url("/public/img/wipe.svg");
     background-size: 60px 60px;
     height:60px;
     width:60px;

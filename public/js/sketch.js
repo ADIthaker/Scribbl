@@ -11,14 +11,8 @@ function setup() {
 	cv.class('drawing-board');
 	socket = io(`http://localhost:3000/`);
 	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-	let userId;
 	if(userInfo == null){
-		userId = uuidv1();
-		sessionStorage.setItem("userInfo",JSON.stringify({
-			userId: userId,
-			roomId: roomId,
-		}));
-		socket.emit("connected_to_room", {roomId: roomId, userId: userId});
+		window.location.href = "/";
 	} else {
 		socket.emit("connected_to_room", userInfo);
 	}
