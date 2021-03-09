@@ -14,14 +14,25 @@ function setup() {
 	if(userInfo == null){
 		window.location.href = "/";
 	} else {
-		socket.emit("connected_to_room", userInfo);
+		socket.emit("connect and get room info", {roomId,userId:userInfo.userId,isAdmin:userInfo.admin});
 	}
-	socket.on("all_players", users => {
+	socket.on("all_players", lobbyInfo => {
+		console.log(lobbyInfo);
+		if(lobbyInfo.adminId == lobbyInfo.userId) socket.emit("start round",lobbyInfo);
 		const playersPane = document.getElementById("player-pane");
 		playersPane.innerHTML = "";
-		users.forEach( user => {
+		lobbyInfo.users.forEach( user => {
 			addPlayerTo(user,playersPane);
-		})
+		});
+		
+	});
+	socket.on("round started", gameState => {
+		console.log(gameState);
+		sessionStorage.setItem("gameState",JSON.stringify(gameState));
+	});
+	socket.on("display chat msg",msgData => {
+		console.log("got it here",msgData)
+		addMsgToChatBox(msgData);
 	});
 	socket.on('mouse', data => {
 		stroke(data.color);
@@ -46,6 +57,7 @@ function setup() {
 		cv.removeClass("pen-on");
 		cv.addClass("eraser-on");		
 	})
+	takeChatMessage();
 	pen.mousePressed(()=>{
 		color = sessionStorage.getItem("color");
 		eraser.style("border","3px solid rgb(255, 240, 0)");
@@ -65,11 +77,41 @@ function setup() {
 
 
 function mouseDragged() {
-	stroke(color)
-	strokeWeight(strokeWidth)
-	line(mouseX, mouseY, pmouseX, pmouseY)
+	const gameState = JSON.parse(sessionStorage.getItem("gameState"));
+	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+	if(gameState!=null && (gameState.currentPlayer == userInfo.userId)){
+		stroke(color)
+		strokeWeight(strokeWidth)
+		line(mouseX, mouseY, pmouseX, pmouseY)
 
-	sendmouse(mouseX, mouseY, pmouseX, pmouseY)
+		sendmouse(mouseX, mouseY, pmouseX, pmouseY)
+	} else {
+		return;
+	}
+	
+}
+
+function takeChatMessage(){
+	const gameState = JSON.parse(sessionStorage.getItem("gameState"));
+	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+	const chatInput = document.getElementById("chat-input");
+	chatInput.addEventListener("keyup",(event)=>{
+		if(event.key=="Enter"){
+			data = {
+				roomId : userInfo.roomId,
+				userId : userInfo.userId,
+				msg: event.target.value,
+			}
+			event.target.value="";
+			socket.emit("sending chat msg",data);
+		}
+	})
+}
+function addMsgToChatBox(msgData){
+	const chatBox = document.getElementById("chat-box");
+	const newMsg = document.createElement("div");
+	newMsg.innerHTML = msgData.userId + " : " + msgData.msg;
+	chatBox.appendChild(newMsg);
 }
 
 function addPlayerTo (name, playersPane) {

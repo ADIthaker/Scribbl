@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
 		socket.join(data.roomId);
 		redisClient.sadd(data.roomId,socket.data.userId)
 		.then(res => {
-			console.log(`${data.userId} joined room ${data.roomId}`,"\n\n");
+			console.log(`${data.userId} joined lobby ${data.roomId}`,"\n\n");
 		});
 		if (socket.data.admin){
 			redisClient.set(socket.data.roomId+"admin",socket.data.userId)
@@ -75,31 +75,31 @@ io.on("connection", (socket) => {
 						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
 					})
 			});
-		}
-		
-		
+		}		
 	});
-	socket.on("game started", data => {
-
+	socket.on("game started",roomId=>{
+		io.in(socket.data.roomId).emit("go to game",roomId);
 	});
-	socket.on("connected_to_room", (data)=>{
+	socket.on("connect and get room info", async (data)=>{
 		socket.data = data;
+		console.log(data);
 		socket.join(data.roomId);
-		redisClient.sadd(data.roomId,socket.data.userId)
-		.then(res=>{
-			console.log(`${data.userId} joined room ${data.roomId}`,"\n\n");
-		});
-		redisClient.smembers(socket.data.roomId)
-		.then(data => {
-			io.in(socket.data.roomId).emit("all_players", data);
-		});
+		await redisClient.sadd(data.roomId,socket.data.userId);
+		console.log(`${data.userId} joined room ${data.roomId}`,"\n\n");
+		if(data.isAdmin) await redisClient.set(data.roomId+"admin", data.userId);
+		const adminId = await redisClient.get(data.roomId+"admin");
+		const allMembers = await redisClient.smembers(socket.data.roomId)
+		let lobbyInfo = {
+			adminId: adminId,
+			users: allMembers,
+			roomId: data.roomId, 
+		};
+		io.in(socket.data.roomId).emit("all_players", lobbyInfo);
 	});
 	socket.on("mouse", data => {
 		socket.to(data.roomId).emit("mouse", data);
 	});
-	socket.on("game start",roomId=>{
-		io.in(socket.data.roomId).emit("go to game",roomId);
-	});
+	
 	socket.on("disconnect", async () => {
 		try{
 			let currParticipants = await redisClient.smembers(socket.data.roomId);
@@ -142,4 +142,24 @@ io.on("connection", (socket) => {
 			console.log(err);
 		}
 	});
+	socket.on("start round", lobbyInfo => {
+		const players = lobbyInfo.users;
+		let currentPlayer = players[0];
+		players.shift();
+		players.push(currentPlayer);
+		lobbyInfo.users = players;
+		let round = 0;
+		redisClient.set(lobbyInfo.roomId+"game_round",round)
+		.then(res=> {
+			const gameState = {
+				...lobbyInfo,
+				currentPlayer,
+			}
+			io.in(lobbyInfo.roomId).emit("round started",gameState);
+		});
+	});
+	socket.on("sending chat msg",msgData=>{
+		console.log("in server sending chat",msgData);
+		io.in(msgData.roomId).emit("display chat msg",msgData);
+	})
 })

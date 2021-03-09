@@ -6,6 +6,7 @@ const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 		sessionStorage.setItem("userInfo",JSON.stringify({
 			userId: userId,
 			roomId: roomId,
+			info: "lobbyInfo",
             admin: isAdmin,
 		}));
 		socket.emit("joined lobby", {roomId: roomId, userId: userId, admin: isAdmin});
@@ -32,6 +33,7 @@ socket.on("admin changed",adminId => {
 })
 socket.on("go to game",(roomId)=>{
 	window.location.href = "/room/"+roomId;
+	
 })
 function addPlayerTo (user, playersPane,adminId) {
 	let newplayer = document.createElement("div");
@@ -49,10 +51,10 @@ function addStartButton(roomId){
     const startButton = document.createElement("button");
     startButton.innerHTML = "START";
     startButton.id = "start-button";
+    startButton.classList.add("start-button");
+    controlPane.appendChild(startButton);
 	startButton.addEventListener("click",(e)=>{
 		socket.emit("game started",roomId);
 	});
-    startButton.classList.add("start-button");
-    controlPane.appendChild(startButton);
 }
 
