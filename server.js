@@ -1,12 +1,10 @@
 const http = require("http")
 const express = require("express");
-const crypto = require("crypto");
 const path = require("path");
 const app = express();
 const redis = require('socket.io-redis');
 const lobbyRoutes = require("./routes/lobbyRoutes");
 const redisClient = require("./config/redis");
-const bodyParser = require("body-parser")
 
 redisClient.on("error", function(error) {
 	console.error(error);
@@ -21,7 +19,7 @@ app.get("/",(req,res,next)=>{
 });
 
 app.use(lobbyRoutes);
-app.get("/lobby/:roomId",(req,res,next)=>{
+app.get("/lobby/:roomId",(req, res, next)=>{
 	console.log("admin",req.query.isadmin);
 	res.render("lobby.ejs",{roomId:req.params.roomId,admin:req.query.isadmin});
 });
@@ -31,135 +29,26 @@ app.get("/room/:roomId",(req,res,next)=>{
 app.use("/public",express.static("public"));
 
 const server = http.createServer(app);
+
 server.on("listening", () => {
  console.log("Listening on port 3000 \nGO to http://localhost:3000/")
 });
 const io = require("socket.io")(server);
 
 server.listen("3000");
+
 io.adapter(redis({ host: "127.0.0.1", port: 6379 }));
+
 io.on("connection", (socket) => {
-	socket.on("joined lobby",data=>{
-		socket.data = data;
-		socket.join(data.roomId);
-		redisClient.sadd(data.roomId,socket.data.userId)
-		.then(res => {
-			console.log(`${data.userId} joined lobby ${data.roomId}`,"\n\n");
-		});
-		if (socket.data.admin){
-			redisClient.set(socket.data.roomId+"admin",socket.data.userId)
-			.then(res =>{
-				redisClient.smembers(socket.data.roomId)
-				.then(data => {
-					redisClient.get(socket.data.roomId+"admin")
-					.then(adminId=>{
-						let lobbyInfo = {
-							adminId,
-							users: data,
-						};
-						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
-					})
-					
-				});
-			});
-		}
-		else {
-			redisClient.smembers(socket.data.roomId)
-			.then(data => {
-				redisClient.get(socket.data.roomId+"admin")
-					.then(adminId=>{
-						let lobbyInfo = {
-							adminId,
-							users: data,
-						};
-						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
-					})
-			});
-		}		
-	});
-	socket.on("game started",roomId=>{
-		io.in(socket.data.roomId).emit("go to game",roomId);
-	});
-	socket.on("connect and get room info", async (data)=>{
-		socket.data = data;
-		console.log(data);
-		socket.join(data.roomId);
-		await redisClient.sadd(data.roomId,socket.data.userId);
-		console.log(`${data.userId} joined room ${data.roomId}`,"\n\n");
-		if(data.isAdmin) await redisClient.set(data.roomId+"admin", data.userId);
-		const adminId = await redisClient.get(data.roomId+"admin");
-		const allMembers = await redisClient.smembers(socket.data.roomId)
-		let lobbyInfo = {
-			adminId: adminId,
-			users: allMembers,
-			roomId: data.roomId, 
-		};
-		io.in(socket.data.roomId).emit("all_players", lobbyInfo);
-	});
+
+	require("./events/lobby")(socket, io, redisClient);
+	require("./events/room")(socket, io, redisClient);
+	require("./events/chat")(socket, io, redisClient);
+
+
 	socket.on("mouse", data => {
 		socket.to(data.roomId).emit("mouse", data);
-	});
+	});	
+
 	
-	socket.on("disconnect", async () => {
-		try{
-			let currParticipants = await redisClient.smembers(socket.data.roomId);
-			let newParticipants = currParticipants.filter(val=>{
-				return val != socket.data.userId;
-			});
-			
-			if(newParticipants.length != 0 ) {
-				let adminId = await redisClient.get(socket.data.roomId+"admin");
-				if(adminId == socket.data.userId) {
-					console.log("ADMIN HAS LEFT, MAKING A RANDOM USER ADMIN")
-					adminId = newParticipants[Math.floor(Math.random()*newParticipants.length)];
-					console.log(adminId);
-					await redisClient.set(socket.data.roomId+"admin",adminId);
-					io.in(socket.data.roomId).emit("admin changed",adminId);
-				}
-				redisClient
-				.pipeline()
-				.del(socket.data.roomId)
-				.sadd(socket.data.roomId,newParticipants)
-				.exec((err,res)=>{
-					if (err) throw new Error(err);
-					console.log(newParticipants,"updated room after player left",res,"\n\n");
-				});
-				redisClient.smembers(socket.data.roomId)
-				.then(data => {
-					let lobbyInfo = {
-						adminId,
-						users:data,
-					}
-					io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
-					io.in(socket.data.roomId).emit("all_players", lobbyInfo);
-				});
-			} else {
-				await redisClient.del(socket.data.roomId);
-				await redisClient.del(socket.data.roomId+"admin");
-				console.log(`${socket.data.roomId} room cleared`);
-			}
-		} catch(err){
-			console.log(err);
-		}
-	});
-	socket.on("start round", lobbyInfo => {
-		const players = lobbyInfo.users;
-		let currentPlayer = players[0];
-		players.shift();
-		players.push(currentPlayer);
-		lobbyInfo.users = players;
-		let round = 0;
-		redisClient.set(lobbyInfo.roomId+"game_round",round)
-		.then(res=> {
-			const gameState = {
-				...lobbyInfo,
-				currentPlayer,
-			}
-			io.in(lobbyInfo.roomId).emit("round started",gameState);
-		});
-	});
-	socket.on("sending chat msg",msgData=>{
-		console.log("in server sending chat",msgData);
-		io.in(msgData.roomId).emit("display chat msg",msgData);
-	})
 })

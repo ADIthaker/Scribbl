@@ -9,9 +9,9 @@ const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 			info: "lobbyInfo",
             admin: isAdmin,
 		}));
-		socket.emit("joined lobby", {roomId: roomId, userId: userId, admin: isAdmin});
+		socket.emit("USER_JOINED_LOBBY", {roomId: roomId, userId: userId, admin: isAdmin});
 	} else {
-		socket.emit("joined lobby", userInfo);
+		socket.emit("USER_JOINED_LOBBY", userInfo);
 	}
 socket.on("user joined lobby", lobbyInfo =>{
     if(isAdmin) addStartButton(roomId);
@@ -23,6 +23,7 @@ socket.on("user joined lobby", lobbyInfo =>{
     })
 });
 socket.on("admin changed",adminId => {
+	removeStartButton();
 	if(userId==adminId) addStartButton(roomId);
 	const playersPane = document.getElementById("lobby-players");
     playersPane.innerHTML = "";
@@ -31,9 +32,8 @@ socket.on("admin changed",adminId => {
         addPlayerTo(user,playersPane,adminId);
     })
 })
-socket.on("go to game",(roomId)=>{
+socket.on("GO_TO_GAME",(roomId)=>{
 	window.location.href = "/room/"+roomId;
-	
 })
 function addPlayerTo (user, playersPane,adminId) {
 	let newplayer = document.createElement("div");
@@ -54,7 +54,11 @@ function addStartButton(roomId){
     startButton.classList.add("start-button");
     controlPane.appendChild(startButton);
 	startButton.addEventListener("click",(e)=>{
-		socket.emit("game started",roomId);
+		socket.emit("START_GAME", roomId);
 	});
+}
+function removeStartButton(){
+	const startButton = document.getElementById("start-button");
+	if(startButton!=null) startButton.remove();
 }
 

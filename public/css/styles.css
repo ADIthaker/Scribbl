@@ -209,6 +209,16 @@ body::-webkit-scrollbar-thumb{
   float:right;
   background-color: white;
   border: 4px solid #F16B12;
-  padding: 4px 10px;
+  padding: 4px 20px;
   border-radius: 10px;
+}
+
+.guess-word{
+  position:absolute;
+  top:0;
+  left:7%;
+  font-size: 2rem;
+  font-family: 'Indie Flower', cursive;
+  color:black;
+  z-index: 50;
 }

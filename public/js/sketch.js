@@ -1,44 +1,75 @@
 let socket;
 let color = '#000';
 let strokeWidth = 4;
+let duration = 30;
+
 function setup() {
-	// Creating canvas
 	const cv = createCanvas(620, 600);
 	cv.position(0,0);
 	cv.background(255,255,255);
 	cv.style('border','1px solid black');
 	cv.parent("canvas-parent");
 	cv.class('drawing-board');
+
 	socket = io(`http://localhost:3000/`);
 	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 	if(userInfo == null){
 		window.location.href = "/";
 	} else {
-		socket.emit("connect and get room info", {roomId,userId:userInfo.userId,isAdmin:userInfo.admin});
+		socket.emit("CONNECT_ROOM", {roomId,userId:userInfo.userId,isAdmin:userInfo.admin});
 	}
-	socket.on("all_players", lobbyInfo => {
+
+	socket.on("SEND_ALL_USERS", lobbyInfo => {
 		console.log(lobbyInfo);
-		if(lobbyInfo.adminId == lobbyInfo.userId) socket.emit("start round",lobbyInfo);
+		const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		const gameState = sessionStorage.getItem("gameState");
+		console.log(gameState,"checking gamestate when sending userinfo")
+		if(userInfo.admin && gameState==null) socket.emit("START_ROUND",lobbyInfo.roomId); 
+		// check if all users have connected to room before starting round
 		const playersPane = document.getElementById("player-pane");
 		playersPane.innerHTML = "";
 		lobbyInfo.users.forEach( user => {
-			addPlayerTo(user,playersPane);
+			addPlayerTo(user, playersPane);
 		});
-		
 	});
-	socket.on("round started", gameState => {
-		console.log(gameState);
-		sessionStorage.setItem("gameState",JSON.stringify(gameState));
-	});
-	socket.on("display chat msg",msgData => {
+//everytime someone new joins room sendall users is triggered and will always trigger start round because sendallusers is sent to every user
+	socket.on("DISPLAY_CHAT_MESSAGE", msgData => {
 		console.log("got it here",msgData)
 		addMsgToChatBox(msgData);
 	});
+
+	socket.on("ROUND_STARTED", gameState => {
+		console.log("ROUND STARTED");
+		sessionStorage.setItem("gameState",JSON.stringify(gameState));
+		const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		if(userInfo.userId == gameState.currentPlayer) {
+			showWord(gameState.randomWord);
+			startTimer();
+			let timer = setInterval(()=>{
+				if(duration > 0){
+					duration--;
+				const timer = document.getElementById("timer");
+				console.log(duration);
+				if(duration < 10){
+					timer.innerHTML = "00:0"+duration ;
+				} else timer.innerHTML = "00:"+duration ;
+				} else{
+					clearInterval(timer);
+					console.log("TIMER ENDED");
+					socket.emit("END_ROUND", gameState);
+				}			
+			},1000);
+		}
+		
+	});
+
+
 	socket.on('mouse', data => {
 		stroke(data.color);
 		strokeWeight(data.strokeWidth)
 		line(data.x, data.y, data.px, data.py);
 	});
+
 	const colorPickers = document.getElementsByClassName("color-sel");
 	for(let i=0;i<colorPickers.length;i++){
 
@@ -77,22 +108,15 @@ function setup() {
 
 
 function mouseDragged() {
-	const gameState = JSON.parse(sessionStorage.getItem("gameState"));
-	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-	if(gameState!=null && (gameState.currentPlayer == userInfo.userId)){
 		stroke(color)
 		strokeWeight(strokeWidth)
 		line(mouseX, mouseY, pmouseX, pmouseY)
 
 		sendmouse(mouseX, mouseY, pmouseX, pmouseY)
-	} else {
-		return;
-	}
-	
 }
 
 function takeChatMessage(){
-	const gameState = JSON.parse(sessionStorage.getItem("gameState"));
+
 	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 	const chatInput = document.getElementById("chat-input");
 	chatInput.addEventListener("keyup",(event)=>{
@@ -103,10 +127,15 @@ function takeChatMessage(){
 				msg: event.target.value,
 			}
 			event.target.value="";
-			socket.emit("sending chat msg",data);
+			socket.emit("SEND_CHAT_MESSAGE",data);
 		}
 	})
 }
+let startTimer = ()=>{
+	const timer = document.getElementById("timer");
+	timer.innerHTML = "00:"+duration;
+}
+	
 function addMsgToChatBox(msgData){
 	const chatBox = document.getElementById("chat-box");
 	const newMsg = document.createElement("div");
@@ -139,4 +168,12 @@ function sendmouse(x, y, pX, pY) {
 	}
 
 	socket.emit('mouse', data)
+}
+
+function showWord(word){
+	const drawingBoard = document.getElementById("canvas-parent");
+	const title = document.getElementById("title-word");
+	title.innerHTML = word;
+	title.classList.add("guess-word");
+	drawingBoard.appendChild(title);
 }
