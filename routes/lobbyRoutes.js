@@ -4,12 +4,21 @@ const redisClient  = require("../config/redis");
 const crypto = require("crypto");
 const querystring = require('querystring'); 
 
-router.get("/createroom",(req,res,next) => {
+router.post("/createroom",async (req,res,next) => {
+	const {name} = req.body;
 	let val = crypto.randomBytes(16).toString("hex");
-	const adminVal = querystring.stringify({
+	const qstring = querystring.stringify({
 		"isadmin": true,
+		"name": name
 	})
-	res.redirect(`/lobby/${val}/?`+adminVal);
+	res.redirect(`/lobby/${val}/?`+qstring);
+});
+router.post("/joinroom", async (req,res,next) => {
+	const {name,room_id} = req.body;
+	const qstring = querystring.stringify({
+		"name": name
+	});
+ 	res.redirect(`/lobby/${room_id}/?`+qstring);
 });
 
 module.exports = router;

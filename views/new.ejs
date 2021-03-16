@@ -62,6 +62,82 @@
             color:rgb(191, 59, 145);
             margin-top:3.5rem !important;
         }
+        #create-room-modal{
+            z-index:100;
+            position: relative;
+            background-color:rgba(0,0,0,0.4);
+            height:100vh !important;
+            width: 100vw;
+            display: none;
+
+        }
+        #join-room-modal{
+            display: none;
+            height:100vh !important;
+            width: 100vw;
+            z-index: 100;
+            position: relative; 
+            background-color:rgba(0,0,0,0.4) ;
+        }
+        #create-form{
+            background-color: white;
+            min-height:300px;
+            min-width:300px;
+            height:350px;
+            width: 350px;
+            position: absolute;
+            top:50%;
+            left:50%;
+            transform: translate(-50%,-50%);
+            border-radius: 20px;
+        }
+        #join-form{
+            background-color: white;
+            min-height:300px;
+            min-width:300px;
+            height:350px;
+            width:350px;
+            position: absolute;
+            top:50%;
+            left:50%;
+            transform: translate(-50%,-50%);
+            border-radius: 20px;
+        }
+        form{
+            position: relative;
+            margin:2rem;
+        }
+        .form__field{
+            margin-left:1rem;
+            margin-right: 1rem;
+            outline:0;
+            border:none;
+            height: 50px;
+            width:90%;
+            border-bottom: 2px solid orange;
+        }
+        .form-title{
+            text-align: center;
+            font-family: 'Gloria Hallelujah', cursive;
+            color:rgb(191, 59, 145);
+            margin-bottom: 3rem;
+
+        }
+        button[type="submit"]{
+            outline:0;
+            border:none;
+            border-radius: 12px;
+            padding:0.9rem;
+            background-color: #662B8C;
+            color:white;
+            margin:2rem auto;
+            position: absolute;
+            left:50%;
+            transform: translate(-50%,0%);
+            font-size: 1.4rem;
+            width:100px;
+            font-family: 'Pangolin', cursive;
+        }
         @media (max-width:1200px){
             h1{
             font-size: 6.5em !important;
@@ -100,11 +176,32 @@
                 margin-top: 1.8rem  !important;
                 font-size: 0.8rem !important;
             }
+            
         }
       </style>
 <body>
     <div class="bg">
+        <div id="create-room-modal" >
+            <div id="create-form">
+                <form action="/createroom" method="POST">
+                    <h2 class="form-title">Create Room</h2>
+                    <input type="input" class="form__field" placeholder="Name" name="name" id='name' required />
+                    <button type="submit">Create</button>
+                </form>
+            </div>
+        </div>
+        <div id="join-room-modal" >
+            <div id="join-form">
+                <form action="/joinroom" method="POST">
+                    <h2 class="form-title">Join Room</h2>
+                    <input type="input" class="form__field" placeholder="Name" name="name" id='name' required />
+                    <input type="input" class="form__field" placeholder="Room Id" name="room_id" id='room_id' required />
+                    <button type="submit">Join</button>
+                </form>
+            </div>
+        </div>
         <div class="container-sm">
+            
             <div class="container">
                 <h1 class="text-center mx-auto">Scribbl.io</h1>
                 <!-- <img class="img-fluid mx-auto d-block mt-5" style="height:180px " src="data:image/png;base64,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" alt=""> -->
@@ -112,7 +209,7 @@
             <div class="container button-container-wrapper">
                 <div class="row">
                     <div class="col-6">
-                        <button class="btn" id="create" style="float:right;" onclick="window.location.href='/createroom'">Create Room</button>
+                        <button class="btn" id="create" style="float:right;" >Create Room</button>
                     </div>
                     <div class="col-6">
                         <button class="btn" id="join" >Join Room</button>

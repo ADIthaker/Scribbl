@@ -25,11 +25,10 @@ function setup() {
 		const gameState = sessionStorage.getItem("gameState");
 		console.log(gameState,"checking gamestate when sending userinfo")
 		if(userInfo.admin && gameState==null) socket.emit("START_ROUND",lobbyInfo.roomId); 
-		// check if all users have connected to room before starting round
 		const playersPane = document.getElementById("player-pane");
 		playersPane.innerHTML = "";
 		lobbyInfo.users.forEach( user => {
-			addPlayerTo(user, playersPane);
+			addPlayerTo(user, playersPane,lobbyInfo);
 		});
 	});
 //everytime someone new joins room sendall users is triggered and will always trigger start round because sendallusers is sent to every user
@@ -42,23 +41,23 @@ function setup() {
 		console.log("ROUND STARTED");
 		sessionStorage.setItem("gameState",JSON.stringify(gameState));
 		const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		startTimer();
+		let timer = setInterval(()=>{
+			if(duration > 0){
+				duration--;
+			const timer = document.getElementById("timer");
+			console.log(duration);
+			if(duration < 10){
+				timer.innerHTML = "00:0"+duration ;
+			} else timer.innerHTML = "00:"+duration ;
+			} else{
+				clearInterval(timer);
+				console.log("TIMER ENDED");
+				socket.emit("END_ROUND", gameState);
+			}			
+		},1000);
 		if(userInfo.userId == gameState.currentPlayer) {
 			showWord(gameState.randomWord);
-			startTimer();
-			let timer = setInterval(()=>{
-				if(duration > 0){
-					duration--;
-				const timer = document.getElementById("timer");
-				console.log(duration);
-				if(duration < 10){
-					timer.innerHTML = "00:0"+duration ;
-				} else timer.innerHTML = "00:"+duration ;
-				} else{
-					clearInterval(timer);
-					console.log("TIMER ENDED");
-					socket.emit("END_ROUND", gameState);
-				}			
-			},1000);
 		}
 		
 	});
@@ -143,10 +142,10 @@ function addMsgToChatBox(msgData){
 	chatBox.appendChild(newMsg);
 }
 
-function addPlayerTo (name, playersPane) {
+function addPlayerTo (user, playersPane,lobbyInfo) {
 	let newplayer = document.createElement("div");
 	let col = document.createElement("div");
-	newplayer.innerHTML= "Aditya";
+	newplayer.innerHTML= lobbyInfo.usernames[user];
 	newplayer.classList.add("player-tab");
 	col.classList.add("col-12");
 	col.appendChild(newplayer);

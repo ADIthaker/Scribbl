@@ -7,6 +7,8 @@ module.exports = (socket, io, redisClient) =>{
 		.then(res => {
 			console.log(`${data.userId} joined lobby ${data.roomId}`,"\n\n");
 		});
+		redisClient.hset(socket.data.roomId+"names",data.userId,data.username)
+		.then(res=> console.log(`${data.userId} set to ${data.username}`))
 		if (socket.data.admin){
 			redisClient.set(socket.data.roomId+"admin",socket.data.userId)
 			.then(res =>{
@@ -14,11 +16,17 @@ module.exports = (socket, io, redisClient) =>{
 				.then(data => {
 					redisClient.get(socket.data.roomId+"admin")
 					.then(adminId=>{
-						let lobbyInfo = {
-							adminId,
-							users: data,
-						};
-						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+						redisClient.hgetall(socket.data.roomId+"names")
+						.then(usernames=>{
+							let lobbyInfo = {
+								adminId,
+								users: data,
+								usernames,
+							};
+							io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+						})
+						
+						
 					})
 					
 				});
@@ -29,11 +37,15 @@ module.exports = (socket, io, redisClient) =>{
 			.then(data => {
 				redisClient.get(socket.data.roomId+"admin")
 					.then(adminId=>{
-						let lobbyInfo = {
-							adminId,
-							users: data,
-						};
-						io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+						redisClient.hgetall(socket.data.roomId+"names")
+						.then(usernames=>{
+							let lobbyInfo = {
+								adminId,
+								users: data,
+								usernames
+							};
+							io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
+						})
 					})
 			});
 		}		
@@ -53,19 +65,24 @@ module.exports = (socket, io, redisClient) =>{
     socket.on(events.USER_DISCONNECTED, async () => {
 		try{
 			let currParticipants = await redisClient.lrange(socket.data.roomId,0,-1);
-			console.log(currParticipants,"currParticipants");
 			let newParticipants = currParticipants.filter(val=>{
 				return val != socket.data.userId;
 			});
-			console.log(newParticipants,"newParticipants");
+			let usernames = await redisClient.hgetall(socket.data.roomId+"names");
+			console.log(newParticipants,"players remaining after one guy left");
 			if(newParticipants.length != 0 ) {
 				let adminId = await redisClient.get(socket.data.roomId+"admin");
 				if(adminId == socket.data.userId) {
 					console.log("ADMIN HAS LEFT, MAKING A RANDOM USER ADMIN")
 					adminId = newParticipants[Math.floor(Math.random()*newParticipants.length)];
 					console.log(adminId);
+					let lobbyInfo = {
+						adminId,
+						users: newParticipants,
+						usernames
+					}
 					await redisClient.set(socket.data.roomId+"admin",adminId);
-					io.in(socket.data.roomId).emit("admin changed",adminId);
+					io.in(socket.data.roomId).emit("admin changed",lobbyInfo);
 				}
 				redisClient
 				.pipeline()
@@ -80,6 +97,7 @@ module.exports = (socket, io, redisClient) =>{
 					let lobbyInfo = {
 						adminId,
 						users:data,
+						usernames
 					}
 					io.in(socket.data.roomId).emit("user joined lobby", lobbyInfo);
 					io.in(socket.data.roomId).emit("SEND_ALL_USERS", lobbyInfo);
@@ -87,6 +105,7 @@ module.exports = (socket, io, redisClient) =>{
 			} else {
 				await redisClient.del(socket.data.roomId);
 				await redisClient.del(socket.data.roomId+"admin");
+				await redisClient.del(socket.data.roomId+"word");
 				console.log(`${socket.data.roomId} room cleared`);
 			}
 		} catch(err){

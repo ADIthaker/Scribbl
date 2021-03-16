@@ -11,11 +11,13 @@ module.exports = (socket, io, redisClient) =>{
             if(data.isAdmin) await redisClient.set(data.roomId+"admin", data.userId);
             const adminId = await redisClient.get(data.roomId+"admin");
             await redisClient.hset(data.roomId+"scores",data.userId, 0);
+            let usernames = await redisClient.hgetall(socket.data.roomId+"names");
             const allMembers = await redisClient.lrange(socket.data.roomId,0,-1);
             let lobbyInfo = {
                 adminId: adminId,
                 users: allMembers,
                 roomId: data.roomId, 
+                usernames
             };
             await redisClient.set(data.roomId+"round",0);
             io.in(socket.data.roomId).emit(events.SEND_ALL_USERS, lobbyInfo);
@@ -30,6 +32,7 @@ module.exports = (socket, io, redisClient) =>{
             const currentPlayer = gameQ[0];
             gameQ.shift();
             gameQ.push(currentPlayer);
+            await redisClient.set(roomId+"currentPlayer",currentPlayer);
             await redisClient.del(roomId+"gameq");
             for(let player of gameQ){
                 await redisClient.lpush(roomId+"gameq", player);
@@ -59,6 +62,7 @@ module.exports = (socket, io, redisClient) =>{
                 let score = await redisClient.hget(gameState.roomId+"scores",player);
                 console.log(`${player} scored ${score} points!!\n`);
             }
+            await redisClient.del(gameState.roomId+"currentPlayer");
         } catch (err){  
             console.log(err);
         }

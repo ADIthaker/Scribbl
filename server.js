@@ -5,7 +5,7 @@ const app = express();
 const redis = require('socket.io-redis');
 const lobbyRoutes = require("./routes/lobbyRoutes");
 const redisClient = require("./config/redis");
-
+const bodyParser = require("body-parser");
 redisClient.on("error", function(error) {
 	console.error(error);
 });
@@ -13,7 +13,7 @@ redisClient.on("error", function(error) {
 app.set("port", "3000");
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-
+app.use(bodyParser.urlencoded({extended: true}));
 app.get("/",(req,res,next)=>{
 	res.render("new.ejs");
 });
@@ -21,7 +21,8 @@ app.get("/",(req,res,next)=>{
 app.use(lobbyRoutes);
 app.get("/lobby/:roomId",(req, res, next)=>{
 	console.log("admin",req.query.isadmin);
-	res.render("lobby.ejs",{roomId:req.params.roomId,admin:req.query.isadmin});
+	console.log("name",req.query.name);
+	res.render("lobby.ejs",{roomId:req.params.roomId,admin:req.query.isadmin,username:req.query.name});
 });
 app.get("/room/:roomId",(req,res,next)=>{
 	res.render("index.ejs",{roomId:req.params.roomId});

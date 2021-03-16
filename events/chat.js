@@ -4,12 +4,12 @@ module.exports = (socket, io, redisClient) =>{
 		console.log("in server sending chat",msgData);
 		const round = await redisClient.get(msgData.roomId+"round");
 		const word = await redisClient.hget(msgData.roomId+"word",round);
-		console.log(word);
+		const currentPlayer = await redisClient.get(msgData.roomId+"currentPlayer");
 		let matchWord = word.toUpperCase();
 		let test = msgData.msg.toUpperCase();
 		if(test.includes(matchWord)) {
 			const isDone = await redisClient.hget(msgData.roomId+"scores",msgData.userId+"done");
-			if(!isDone){
+			if(!isDone && msgData.userId!==currentPlayer){
 				let newScore = await redisClient.hget(msgData.roomId+"scores",msgData.userId);
 				newScore = parseInt(newScore)+10;
 				await redisClient.hset(msgData.roomId+"scores",msgData.userId, newScore);
