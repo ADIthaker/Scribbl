@@ -1,7 +1,7 @@
 let socket;
 let color = '#000';
 let strokeWidth = 4;
-let duration = 30;
+let duration = 59;
 
 function setup() {
 	const cv = createCanvas(620, 600);
@@ -69,6 +69,12 @@ function setup() {
 		line(data.x, data.y, data.px, data.py);
 	});
 
+	socket.on("SHOW_SCORES",roomId=>{
+		window.location.href="/scores/"+roomId;
+		sessionStorage.removeItem("gameState");
+		sessionStorage.removeItem("userInfo");
+	})
+
 	const colorPickers = document.getElementsByClassName("color-sel");
 	for(let i=0;i<colorPickers.length;i++){
 
@@ -124,6 +130,7 @@ function takeChatMessage(){
 				roomId : userInfo.roomId,
 				userId : userInfo.userId,
 				msg: event.target.value,
+				username: userInfo.username
 			}
 			event.target.value="";
 			socket.emit("SEND_CHAT_MESSAGE",data);
@@ -138,7 +145,7 @@ let startTimer = ()=>{
 function addMsgToChatBox(msgData){
 	const chatBox = document.getElementById("chat-box");
 	const newMsg = document.createElement("div");
-	newMsg.innerHTML = msgData.userId + " : " + msgData.msg;
+	newMsg.innerHTML = "<b>"+ msgData.username+"</b>" + " : " + msgData.msg;
 	chatBox.appendChild(newMsg);
 }
 

@@ -58,11 +58,9 @@ module.exports = (socket, io, redisClient) =>{
             // await redisClient.set(gameState.roomId+"round",round);
             const players = await redisClient.lrange(gameState.roomId,0,-1);
             console.log(players);
-            for(let player of players){
-                let score = await redisClient.hget(gameState.roomId+"scores",player);
-                console.log(`${player} scored ${score} points!!\n`);
-            }
+            let scores = await redisClient.hgetall(gameState.roomId+"scores");
             await redisClient.del(gameState.roomId+"currentPlayer");
+            io.in(gameState.roomId).emit(events.SHOW_SCORES,gameState.roomId);
         } catch (err){  
             console.log(err);
         }

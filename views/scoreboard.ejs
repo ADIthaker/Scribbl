@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Scribbl.io</title>
+  <link rel = "icon" href =  
+"/public/img/logo.png"
+        type = "image/x-icon">
+    <script src="https://unpkg.com/uuid@latest/dist/umd/uuidv1.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/public/css/styles.css" />
+  <link rel="stylesheet" type="text/css" href="/public/css/inputstyles.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pangolin&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/public/css/scoreboardstyles.css" />
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.sound.min.js">
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <h1 id="table-heading">Scores</h1>
+    <div class="table">
+        <table class="rwd-table">
+            <tr>
+              <th>Name</th>
+              <th>Score</th>
+            </tr>
+            <% for(let player in usernames) {%>
+                <tr>
+                    <td data-th="Name"><%=usernames[player]%></td>
+                    <td data-th="Score"><%=scores[player]%></td>
+                  </tr>
+                
+            <%}%>
+          </table>
+    </div>
+</body>
+</html>

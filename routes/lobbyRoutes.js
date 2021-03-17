@@ -20,5 +20,11 @@ router.post("/joinroom", async (req,res,next) => {
 	});
  	res.redirect(`/lobby/${room_id}/?`+qstring);
 });
+router.get("/scores/:roomId",async (req,res,next)=>{
+	const scores = await redisClient.hgetall(req.params.roomId+"scores");
+	const usernames = await redisClient.hgetall(req.params.roomId+"names");
+	console.log(req.params.roomId);
+	res.render("scoreboard",{scores,usernames});
+});
 
 module.exports = router;
