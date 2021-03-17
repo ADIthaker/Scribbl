@@ -1,29 +1,73 @@
 let socket;
 let color = '#000';
 let strokeWidth = 4;
-let duration = 59;
+let duration = 30;
 
-function setup() {
+function getLocalAudioStream(myPeer) {
+	const myAudio = document.createElement("audio");
+	myAudio.muted = true;
+	navigator.mediaDevices.getUserMedia({video: false, audio: true})
+	.then(stream=>{
+		addAudioStream(myAudio,stream);
+		myPeer.on('call', call=>{
+			console.log("GOT A CALL",call);
+			call.answer(stream);
+			call.on('stream', otherStream => {
+				console.log("replying")
+				const audio = document.createElement("audio");
+				addAudioStream(audio,otherStream);
+			});
+		});
+		socket.on("CONNECTED_USER_TO_CALL",id=>{
+			connectToNewUser(myPeer, id, stream);
+		});
+	})
+	.catch(err=>console.log(err));
+}
+
+function connectToNewUser(myPeer, peerId, myStream) {
+	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+	console.log('Calling ' + peerId +" from "+userInfo.userId );
+	let call = myPeer.call(peerId, myStream);
+	const audio = document.createElement( "audio");
+	call.on('stream', otherStream => {
+	  addAudioStream(audio,otherStream)
+	});
+	call.on("close",()=>audio.remove())
+	call.on('error', function(err) {
+		console.log(err);
+	});
+}
+function addAudioStream(audio,stream){
+	audio.srcObject = stream;
+	audio.autoplay= true;
+	document.body.appendChild(audio);
+}
+function setup() { 
 	const cv = createCanvas(620, 600);
 	cv.position(0,0);
 	cv.background(255,255,255);
 	cv.style('border','1px solid black');
 	cv.parent("canvas-parent");
 	cv.class('drawing-board');
-
 	socket = io(`http://localhost:3000/`);
 	const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 	if(userInfo == null){
 		window.location.href = "/";
 	} else {
+	let myPeer = new Peer(userInfo.userId);
+	console.log(myPeer.id,"me");
+	getLocalAudioStream(myPeer);
+	myPeer.on("open", id=>{ 
+		socket.emit("JOIN_CALL_ROOM",{userId:id, roomId: userInfo.roomId});
 		socket.emit("CONNECT_ROOM", {roomId,userId:userInfo.userId,isAdmin:userInfo.admin});
-	}
-
+	});
+		
+	}	
+	
 	socket.on("SEND_ALL_USERS", lobbyInfo => {
-		console.log(lobbyInfo);
 		const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 		const gameState = sessionStorage.getItem("gameState");
-		console.log(gameState,"checking gamestate when sending userinfo")
 		if(userInfo.admin && gameState==null) socket.emit("START_ROUND",lobbyInfo.roomId); 
 		const playersPane = document.getElementById("player-pane");
 		playersPane.innerHTML = "";
@@ -59,7 +103,6 @@ function setup() {
 		if(userInfo.userId == gameState.currentPlayer) {
 			showWord(gameState.randomWord);
 		}
-		
 	});
 
 
@@ -70,6 +113,7 @@ function setup() {
 	});
 
 	socket.on("SHOW_SCORES",roomId=>{
+		console.log("round over");
 		window.location.href="/scores/"+roomId;
 		sessionStorage.removeItem("gameState");
 		sessionStorage.removeItem("userInfo");

@@ -26,6 +26,9 @@ module.exports = (socket, io, redisClient) =>{
             console.log(err);
         }
 	});
+    socket.on("JOIN_CALL_ROOM", data=>{
+        socket.to(data.roomId).broadcast.emit("CONNECTED_USER_TO_CALL",data.userId);
+    });
     socket.on(events.START_ROUND, async roomId=>{
         try{
             const gameQ = await redisClient.lrange(roomId+"gameq",0,-1);
